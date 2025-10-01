@@ -10,13 +10,27 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+var Version = "dev"
+
 func main() {
 	var (
-		runOnce = flag.Bool("run-once", false, "Run backup immediately and exit")
+		runOnce  = flag.Bool("run-once", false, "Run backup immediately and exit")
+		showHelp = flag.Bool("help", false, "Show help message")
+		version  = flag.Bool("version", false, "Show version and exit")
 	)
 	flag.Parse()
 
-	fmt.Printf("runOnce = %v\n", *runOnce)
+	if *showHelp {
+		fmt.Println("Usage: fs-backup [options] [config_path]")
+		fmt.Println("Options:")
+		flag.PrintDefaults()
+		return
+	}
+
+	if *version {
+		fmt.Printf("fs-backup version: %s\n", Version)
+		return
+	}
 
 	configPath := "/etc/fs-backup/config.yaml"
 	if len(flag.Args()) > 0 {
