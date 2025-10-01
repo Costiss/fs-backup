@@ -1,8 +1,8 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
 
 	"github.com/Costiss/fs-backup/backup"
 	"github.com/Costiss/fs-backup/config"
@@ -11,9 +11,16 @@ import (
 )
 
 func main() {
+	var (
+		runOnce = flag.Bool("run-once", false, "Run backup immediately and exit")
+	)
+	flag.Parse()
+
+	fmt.Printf("runOnce = %v\n", *runOnce)
+
 	configPath := "/etc/fs-backup/config.yaml"
-	if len(os.Args) > 1 {
-		configPath = os.Args[1]
+	if len(flag.Args()) > 0 {
+		configPath = flag.Args()[0]
 	}
 
 	cfg, err := config.LoadConfig(configPath)
@@ -28,6 +35,14 @@ func main() {
 	}
 
 	logger := logging.GetLogger("main", cfg)
+
+	if *runOnce {
+		logger.Println("==============================================")
+		logger.Println("         🚀 FS-BACKUP: Running Once 🚀        ")
+		logger.Println("==============================================")
+		backup.Run(cfg)
+		return
+	}
 
 	c := cron.New()
 	_, err = c.AddFunc(cfg.Backup.Schedule, func() {
