@@ -1,0 +1,10 @@
+[Unit]
+Description=File System Backup Service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/fs-backup
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

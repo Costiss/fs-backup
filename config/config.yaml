@@ -1,0 +1,12 @@
+s3:
+  bucket: "your-s3-bucket-name"
+  region: "your-s3-bucket-region"
+  endpoint: "https://s3.magalucloud.com"
+  access_key: "your-access-key"
+  secret_key: "your-secret-key"
+backup:
+  schedule: "* * * * *" # Every minute
+  log_file: "./config/backup.log"
+  directories:
+    - "/tmp/a"
+    - "/path/to/dir2"
