@@ -12,7 +12,7 @@ import (
 func getLogFile(cfg *config.Config) *os.File {
 	logFilePath := cfg.Backup.LogFile
 	if logFilePath == "" {
-		logFilePath = "/var/log/fs-backup.log"
+		return nil
 	}
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -25,7 +25,12 @@ func getLogFile(cfg *config.Config) *os.File {
 
 func GetLogger(name string, cfg *config.Config) *log.Logger {
 	logFile := getLogFile(cfg)
-	multiWriter := io.MultiWriter(os.Stdout, logFile)
-	logger := log.New(multiWriter, fmt.Sprintf("%s: ", name), log.LstdFlags)
+
+	var writer io.Writer = os.Stdout
+	if logFile != nil {
+		writer = io.MultiWriter(os.Stdout, logFile)
+	}
+	logger := log.New(writer, fmt.Sprintf("%s: ", name), log.LstdFlags)
+
 	return logger
 }
