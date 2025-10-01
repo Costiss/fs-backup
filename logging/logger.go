@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/user/fs-backup/config"
+	"github.com/Costiss/fs-backup/config"
 )
 
 func getLogFile(cfg *config.Config) *os.File {

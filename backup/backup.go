@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/user/fs-backup/config"
-	"github.com/user/fs-backup/logging"
+	"github.com/Costiss/fs-backup/config"
+	"github.com/Costiss/fs-backup/logging"
 )
 
 func Run(cfg *config.Config) {

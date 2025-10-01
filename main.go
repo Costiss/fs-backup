@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Costiss/fs-backup/backup"
+	"github.com/Costiss/fs-backup/config"
+	"github.com/Costiss/fs-backup/logging"
 	"github.com/robfig/cron/v3"
-	"github.com/user/fs-backup/backup"
-	"github.com/user/fs-backup/config"
-	"github.com/user/fs-backup/logging"
 )
 
 func main() {
