@@ -20,9 +20,10 @@ type S3Config struct {
 }
 
 type BackupConfig struct {
-	Directories []string `yaml:"directories"`
-	LogFile     string   `yaml:"log_file,omitempty"`
-	Schedule    string   `yaml:"schedule"`
+	Directories        []string `yaml:"directories"`
+	LogFile            string   `yaml:"log_file,omitempty"`
+	Schedule           string   `yaml:"schedule"`
+	GpgEncryptPassword string   `yaml:"gpg_encrypt_password,omitempty"`
 }
 
 func LoadConfig(path string) (*Config, error) {

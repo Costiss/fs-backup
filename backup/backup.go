@@ -4,8 +4,8 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"io"
-	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/Costiss/fs-backup/config"
@@ -25,6 +25,7 @@ func Run(cfg *config.Config) {
 		logger.Println("----------------------------------------------")
 
 		tarpath := dir + ".tar.gz"
+		encryptedTarpath := tarpath + ".gpg"
 		err := compressDirectory(dir, tarpath)
 		if err != nil {
 			logger.Printf("  ✗ Error compressing directory: %v\n", err)
@@ -32,10 +33,21 @@ func Run(cfg *config.Config) {
 			continue
 		}
 
-		logger.Printf("  ✓ Created archive: %s\n", tarpath)
+		finalPath := tarpath
+		if cfg.Backup.GpgEncryptPassword != "" {
+			if err := encryptFileWithGPG(tarpath, encryptedTarpath, cfg.Backup.GpgEncryptPassword); err != nil {
+				logger.Printf("  ✗ Error encrypting archive: %v\n", err)
+				logger.Println("----------------------------------------------")
+				continue
+			}
+			finalPath = encryptedTarpath
+		}
+		defer os.Remove(finalPath)
+
+		logger.Printf("  ✓ Created archive: %s\n", finalPath)
 
 		s3Cfg := S3Config{
-			FilePath:  tarpath,
+			FilePath:  finalPath,
 			Bucket:    cfg.S3.Bucket,
 			Region:    cfg.S3.Region,
 			Endpoint:  cfg.S3.Endpoint,
@@ -45,13 +57,11 @@ func Run(cfg *config.Config) {
 		if err := UploadToS3(s3Cfg); err != nil {
 			logger.Printf("  ✗ Error uploading to S3: %v\n", err)
 			logger.Println("----------------------------------------------")
-			os.Remove(tarpath)
 			continue
 		}
 
 		logger.Printf("  ✓ Successfully backed up directory: %s\n", dir)
 		logger.Println("----------------------------------------------")
-		os.Remove(tarpath)
 	}
 
 	logger.Println("==============================================")
@@ -104,16 +114,9 @@ func compressDirectory(srcDir, destFile string) error {
 
 }
 
-func getLogFile(cfg *config.Config) *os.File {
-	logFilePath := cfg.Backup.LogFile
-	if logFilePath == "" {
-		logFilePath = "/var/log/fs-backup.log"
-	}
-
-	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatalf("Failed to open log file: %v", err)
-	}
-
-	return logFile
+func encryptFileWithGPG(inPath, outPath, password string) error {
+	cmd := exec.Command("gpg", "--batch", "--yes", "--passphrase", password, "--symmetric", "--cipher-algo", "AES256", "-o", outPath, inPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

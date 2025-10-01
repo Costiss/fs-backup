@@ -7,6 +7,7 @@ s3:
 backup:
   schedule: "* * * * *" # Every minute
   log_file: "./config/backup.log"
+  # gpg_encrypt_password: "your-encryption-password" # Uncomment to enable encryption
   directories:
     - "/tmp/a"
     - "/path/to/dir2"
