@@ -27,7 +27,8 @@ s3:
   secret_key: "your-secret-key"
 backup:
   schedule: "* * * * *" # Every minute (Cron format)
-  log_file: "/var/log/fs-backup/backup.log" # Ensure this directory exists and is writable
+  # log_file: "/var/log/fs-backup/backup.log" # Optonal: Ensure this directory exists and is writable
+  # gpg_encrypt_password: "your-encryption-password" # Optional GPG encryption password
   directories:
     - "/path/to/your/directory1"
     - "/path/to/your/directory2"
