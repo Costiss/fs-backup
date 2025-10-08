@@ -19,11 +19,19 @@ type S3Config struct {
 	SecretKey string `yaml:"secret_key"`
 }
 
+type PGConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password,omitempty"`
+}
+
 type BackupConfig struct {
-	Directories        []string `yaml:"directories"`
-	LogFile            string   `yaml:"log_file,omitempty"`
-	Schedule           string   `yaml:"schedule"`
-	GpgEncryptPassword string   `yaml:"gpg_encrypt_password,omitempty"`
+	Database           []PGConfig `yaml:"database"`
+	Directories        []string   `yaml:"directories"`
+	LogFile            string     `yaml:"log_file,omitempty"`
+	Schedule           string     `yaml:"schedule"`
+	GpgEncryptPassword string     `yaml:"gpg_encrypt_password,omitempty"`
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -35,6 +43,14 @@ func LoadConfig(path string) (*Config, error) {
 	var config Config
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, err
+	}
+
+	for i := range config.Backup.Database {
+		envName := "PG_PASSWORD_" + config.Backup.Database[i].User
+		pwd := os.Getenv(envName)
+		if pwd != "" {
+			config.Backup.Database[i].Password = pwd
+		}
 	}
 
 	return &config, nil

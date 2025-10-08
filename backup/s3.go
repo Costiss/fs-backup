@@ -3,6 +3,7 @@ package backup
 import (
 	"context"
 	"os"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -39,12 +40,14 @@ func UploadToS3(cfg S3Config) error {
 		return err
 	}
 
-	client := s3.NewFromConfig(awsCfg)
+	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+		o.UsePathStyle = true
+	})
 	uploader := manager.NewUploader(client)
 
 	_, err = uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(cfg.Bucket),
-		Key:    aws.String(cfg.FilePath),
+		Key:    aws.String(filepath.Base(cfg.FilePath)),
 		Body:   file,
 	})
 
